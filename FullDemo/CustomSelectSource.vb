@@ -12,7 +12,7 @@ Public Class CustomSelectSource
 
     Private Sub CustomSelectSource_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
         sourceSelected = False
-        Dim SourceArray As Integer = 0
+        Dim SourceArray As System.IntPtr
         DTWAINAPI.DTWAIN_EnumSources(SourceArray)
         Dim nCount As Integer = DTWAINAPI.DTWAIN_ArrayGetCount(SourceArray)
         If nCount <= 0 Then
@@ -20,11 +20,10 @@ Public Class CustomSelectSource
         End If
 
         ' Display the sources
-        Dim CurSource As Integer = 0
+        Dim CurSource As System.IntPtr
         For i As Integer = 0 To nCount - 1
-            Dim szName As String
-            szName = Space$(256)
-            DTWAINAPI.DTWAIN_ArrayGetAtLong(SourceArray, i, CurSource)
+            Dim szName As New System.Text.StringBuilder(256)
+            DTWAINAPI.DTWAIN_ArrayGetSourceAt(SourceArray, i, CurSource)
             DTWAINAPI.DTWAIN_GetSourceProductName(CurSource, szName, 255)
             listSources.Items.Add(szName.ToString())
         Next
