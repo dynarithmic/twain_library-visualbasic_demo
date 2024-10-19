@@ -238,9 +238,10 @@ Public Class DTwainDemo
         dllExists = True
         sOrigTitle = Me.Text
         Try
+            MessageBox.Show("To run this demo, please make sure that DTWAIN32U.DLL is located in either the executable directory, or in a directory specified on your system path.")
             TwainOK = DTWAINAPI.DTWAIN_IsTwainAvailable()
         Catch ex As System.DllNotFoundException
-            MessageBox.Show(ex.Message)
+            MessageBox.Show("Could not find or load DTWAIN32U.DLL")
             dllExists = False
             Dispose()
         End Try
@@ -271,14 +272,15 @@ Public Class DTwainDemo
     End Function
 
     Private Sub SetCaptionToSourceName()
-        Dim SourceName As New StringBuilder(256)
-        Dim sTitle As New StringBuilder
-        sTitle.Append(sOrigTitle)
+        Dim SourceName As String
+        Dim sTitle As String
+        SourceName = Space$(256)
+        sTitle = sOrigTitle
         If SelectedSource <> 0 Then
             DTWAINAPI.DTWAIN_GetSourceProductName(SelectedSource, SourceName, 255)
-            sTitle.Append(" - ")
-            sTitle.Append(SourceName)
-            Me.Text = sTitle.ToString
+            sTitle += " - "
+            sTitle += SourceName
+            Me.Text = sTitle
         Else
             Me.Text = sOrigTitle
         End If
@@ -353,6 +355,7 @@ Public Class DTwainDemo
                 Return CType(img_obj, Bitmap)
             End If
         End If
+        Return Nothing
     End Function
 
 
@@ -516,7 +519,7 @@ Public Class DTwainDemo
 
                 Case 1
                     If DTWAINAPI.DTWAIN_IsFileXferSupported(SelectedSource, DTWAINAPI.DTWAIN_ANYSUPPORT) = 0 Then
-                        MessageBox.Show("Sorry.  The selected driver does Not have built-in file transfer support.")
+                        MessageBox.Show("Sorry.  The selected driver does not have built-in file transfer support.")
                         Return
                     End If
                     If DTWAINAPI.DTWAIN_IsFileXferSupported(SelectedSource, DTWAINAPI.DTWAIN_FF_BMP) = 0 Then
