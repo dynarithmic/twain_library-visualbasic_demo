@@ -29,7 +29,7 @@ Public Class CustomSelectSource
         Next
         listSources.SelectedIndex = 0
         ' Display Info about sources
-        Dim sText As String = nCount.ToString() & " TWAIN Source(s) available for selection"
+        Dim sText As String = nCount.ToString() & " TWAIN Source(s) Available for Selection"
         editSourceInfo.Text = sText
     End Sub
 
