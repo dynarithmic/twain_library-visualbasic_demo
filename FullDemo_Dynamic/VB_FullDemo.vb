@@ -4,12 +4,13 @@ Imports System.Windows.Forms
 Imports System.Runtime.InteropServices
 Imports System.Text
 Imports System.Diagnostics
+Imports Dynarithmic ' Root namespace is set to blank for this project
+
 
 Public Class VB_FullDemo
     Inherits System.Windows.Forms.Form
 
 #Region " Windows Form Designer generated code "
-
     Public Sub New()
         MyBase.New()
         thisObject = Me
@@ -317,19 +318,27 @@ Public Class VB_FullDemo
     Private Shared thisObject As VB_FullDemo
     Private dllExists As Boolean
     Private Shared cb As DTWAINAPI.DTwainCallback = New DTWAINAPI.DTwainCallback(AddressOf callbackfn)
+    Public DTWAINAPI As Dynarithmic.DTWAINAPI = Nothing
 
 
     Private Sub VB_FullDemo_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
         Me.SelectSource.Enabled = False
         dllExists = True
         sOrigTitle = Me.Text
+
+        ' Load the 32-bit or 64-bit DLL, depending on the application type
         Try
-            TwainOK = DTWAINAPI.DTWAIN_IsTwainAvailable()
+            If IntPtr.Size = 8 Then
+                DTWAINAPI = New DTWAINAPI("dtwain64u.dll")
+            Else
+                DTWAINAPI = New DTWAINAPI("dtwain32u.dll")
+            End If
         Catch ex As System.DllNotFoundException
             MessageBox.Show(ex.Message)
             dllExists = False
             Dispose()
         End Try
+        TwainOK = DTWAINAPI.DTWAIN_IsTwainAvailable()
         SelectedSource = 0
         If TwainOK <> 0 Then
             TwainHandle = DTWAINAPI.DTWAIN_SysInitialize()
@@ -347,7 +356,7 @@ Public Class VB_FullDemo
         Select Case wparam
             Case DTWAINAPI.DTWAIN_TN_QUERYPAGEDISCARD
                 If thisObject.ShowPreview.Checked Then
-                    Dim sDIBDlg As New DibDisplayerDlg2(DTWAINAPI.DTWAIN_GetCurrentAcquiredImage(SelectedSource))
+                    Dim sDIBDlg As New DibDisplayerDlg2(VB_FullDemo.DTWAINAPI.DTWAIN_GetCurrentAcquiredImage(SelectedSource))
                     If sDIBDlg.ShowDialog() = DialogResult.Cancel Then
                         Return 0
                     End If
@@ -387,7 +396,7 @@ Public Class VB_FullDemo
             Case 0
                 Dim nullString As String
                 nullString = IntPtr.Zero
-                SelectedSource = DTWAINAPI.DTWAIN_SelectSource2A(IntPtr.Zero, Nothing, 0, 0,
+                SelectedSource = DTWAINAPI.DTWAIN_SelectSource2(IntPtr.Zero, Nothing, 0, 0,
                                                                 DTWAINAPI.DTWAIN_DLG_CENTER_SCREEN Or DTWAINAPI.DTWAIN_DLG_TOPMOSTWINDOW)
             Case 1
                 Dim objSelectSourceByName As SelectSourceByName = New SelectSourceByName()
@@ -396,7 +405,7 @@ Public Class VB_FullDemo
                     SelectedSource = DTWAINAPI.DTWAIN_SelectSourceByName(objSelectSourceByName.GetText())
                 End If
             Case 2
-                SelectedSource = DTWAINAPI.DTWAIN_SelectDefaultSource
+                SelectedSource = DTWAINAPI.DTWAIN_SelectDefaultSource()
             Case 3
                 Dim customSourceDlg As New CustomSelectSource()
                 Dim dResult As DialogResult = customSourceDlg.ShowDialog()
